@@ -1,6 +1,7 @@
 const searchSong = () => {
     const searchText = document.getElementById('search-field').value;
     const url = `https://api.lyrics.ovh/suggest/${searchText}`
+    toggleSpinner();
     fetch(url)
         .then(res => res.json())
         .then(data => displaySongs(data.data))
@@ -15,6 +16,15 @@ const searchSong = () => {
     displaySongs(data.data);
 } */
 
+
+document.getElementById("search-field").addEventListener("keypress", function (event) {
+    //event.preventDefault();
+    //console.log('keycode', event.key, event.keyCode); //these two lines of code doesn't working, Thats why commented. 
+    if (event.key == 'Enter'){
+        document.getElementById("search-button").click();
+    } 
+});
+
 const displaySongs = songs => {
     console.log(songs);
     const songContainer = document.getElementById('song-container');
@@ -28,14 +38,15 @@ const displaySongs = songs => {
             <p class="author lead">Album by <span>${song.artist.name}</span></p>
             <audio controls>
                 <source src="${song.preview}" type="audio/mpeg">
-            </audio>
-            
+            </audio> 
         </div>
+        
         <div class="col-md-3 text-md-right text-center">
             <button onclick="getLyric('${song.artist.name}','${song.title}')" class="btn btn-success">Get Lyrics</button>
         </div>    
         `;
         songContainer.appendChild(songDiv);
+        toggleSpinner();
     });
 
 }
@@ -48,15 +59,17 @@ const displaySongs = songs => {
 } */
 
 const getLyric = async (artist, title) => {
-    const url = `https://api.lyrics.ovh/v15/${artist}/${title}`;
+    toggleSpinner();
+    const url = `https://api.lyrics.ovh/v1/${artist}/${title}`;
     try {
         const res = await fetch(url);
         const data = await res.json();
         displayLyrics(data.lyrics);
     }
     catch (error) {
-        displayError('Sorry! I failed to load lyrics. Please try again later!')
+        displayError('Sorry! I failed to load lyrics. Please try again later!');
     }
+    toggleSpinner();
 
 }
 
@@ -68,4 +81,11 @@ const displayLyrics = lyrics => {
 const displayError = error => {
     const errorTag = document.getElementById('error-message');
     errorTag.innerText = error;
+}
+
+const toggleSpinner = () => {
+    const spinner = document.getElementById('loading-spinner');
+    const songs = document.getElementById('song-container');
+    spinner.classList.toggle('d-none');
+    songs.classList.toggle('d-none');
 }
